@@ -12,6 +12,16 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newMovie, setNewMovie] = useState({
+    title: '',
+    genreId: '',
+    releaseYear: '',
+    watched: false,
+    rating: '',
+    comment: '',
+  });
+
   const [editingId, setEditingId] = useState(null);
   const [editData, setEditData] = useState({
     title: '',
@@ -61,6 +71,67 @@ function App() {
 
       const data = await res.json();
       setGenres(data);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const resetNewMovie = () => {
+    setNewMovie({
+      title: '',
+      genreId: '',
+      releaseYear: '',
+      watched: false,
+      rating: '',
+      comment: '',
+    });
+  };
+
+  const createMovie = async (e) => {
+    e.preventDefault();
+
+    try {
+      setError('');
+
+      if (!newMovie.title || !newMovie.genreId || !newMovie.releaseYear) {
+        setError('Title, genre and release year are required');
+        return;
+      }
+
+      const movieRes = await fetch(MOVIES_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: newMovie.title,
+          genreId: newMovie.genreId,
+          releaseYear: Number(newMovie.releaseYear),
+        }),
+      });
+
+      if (!movieRes.ok) {
+        throw new Error('Failed to create movie');
+      }
+
+      const createdMovie = await movieRes.json();
+
+      const entryRes = await fetch(WATCHLIST_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          movieId: createdMovie._id,
+          watched: newMovie.watched,
+          rating: newMovie.rating ? Number(newMovie.rating) : undefined,
+          comment: newMovie.comment,
+        }),
+      });
+
+      if (!entryRes.ok) {
+        throw new Error('Failed to create watchlist entry');
+      }
+
+      resetNewMovie();
+      setShowAddForm(false);
+      fetchEntries();
     } catch (err) {
       setError(err.message);
     }
@@ -196,6 +267,75 @@ function App() {
     <div className="container">
       <h1>Personal Movie Tracker</h1>
 
+      <button onClick={() => setShowAddForm(!showAddForm)}>
+        {showAddForm ? 'Close Add Form' : 'Add Movie'}
+      </button>
+
+      {showAddForm && (
+        <form className="form" onSubmit={createMovie}>
+          <h2>Add Movie</h2>
+
+          <input
+            type="text"
+            placeholder="Movie title"
+            value={newMovie.title}
+            onChange={(e) => setNewMovie({ ...newMovie, title: e.target.value })}
+          />
+
+          <select
+            value={newMovie.genreId}
+            onChange={(e) => setNewMovie({ ...newMovie, genreId: e.target.value })}
+          >
+            <option value="">Select genre</option>
+            {genres.map((genre) => (
+              <option key={genre._id} value={genre._id}>
+                {genre.name}
+              </option>
+            ))}
+          </select>
+
+          <input
+            type="number"
+            placeholder="Release year"
+            value={newMovie.releaseYear}
+            onChange={(e) =>
+              setNewMovie({ ...newMovie, releaseYear: e.target.value })
+            }
+          />
+
+          <label>
+            Watched
+            <input
+              type="checkbox"
+              checked={newMovie.watched}
+              onChange={(e) =>
+                setNewMovie({ ...newMovie, watched: e.target.checked })
+              }
+            />
+          </label>
+
+          <input
+            type="number"
+            min="1"
+            max="5"
+            placeholder="Rating"
+            value={newMovie.rating}
+            onChange={(e) => setNewMovie({ ...newMovie, rating: e.target.value })}
+          />
+
+          <input
+            type="text"
+            placeholder="Comment"
+            value={newMovie.comment}
+            onChange={(e) =>
+              setNewMovie({ ...newMovie, comment: e.target.value })
+            }
+          />
+
+          <button type="submit">Save</button>
+        </form>
+      )}
+
       <div className="controls">
         <select value={filter} onChange={(e) => setFilter(e.target.value)}>
           <option value="all">All movies</option>
@@ -267,7 +407,10 @@ function App() {
                         type="number"
                         value={editData.releaseYear}
                         onChange={(e) =>
-                          setEditData({ ...editData, releaseYear: e.target.value })
+                          setEditData({
+                            ...editData,
+                            releaseYear: e.target.value,
+                          })
                         }
                       />
                     </td>
