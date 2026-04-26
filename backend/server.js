@@ -4,6 +4,7 @@ const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const watchlistRoutes = require('./routes/watchlistRoutes');
 const movieRoutes = require('./routes/movieRoutes');
+const genreRoutes = require('./routes/genreRoutes');
 
 dotenv.config();
 
@@ -16,6 +17,7 @@ app.use(express.json());
 
 app.use('/api/watchlist', watchlistRoutes);
 app.use('/api/movies', movieRoutes);
+app.use('/api/genres', genreRoutes);
 
 app.get('/', (req, res) => {
     return res.json({message: 'Movie Tracker API is running...'});
