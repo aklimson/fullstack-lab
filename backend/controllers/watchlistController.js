@@ -37,7 +37,7 @@ const createWatchlistEntry = async (req, res) => {
 
 const updateWatchlistEntry = async (req, res) => {
     try {
-        const updatedEntry = await WatchlistEntry.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+        const updatedEntry = await WatchlistEntry.findByIdAndUpdate(req.params.id, req.body, { returnDocument: 'after', runValidators: true });
 
         if (!updatedEntry) {
         return res.status(404).json({ error: 'Watchlist entry not found' });

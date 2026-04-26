@@ -1,122 +1,148 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useEffect, useState } from 'react';
+import './App.css';
+
+const API_URL = 'http://localhost:4000/api/watchlist';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [entries, setEntries] = useState([]);
+  const [filter, setFilter] = useState('all');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  const fetchEntries = async () => {
+    try {
+      setError('');
+
+      let url = API_URL;
+
+      if (filter === 'watched') {
+        url += '?watched=true';
+      }
+
+      if (filter === 'notWatched') {
+        url += '?watched=false';
+      }
+
+      const res = await fetch(url);
+
+      if (!res.ok) {
+        throw new Error('Failed to fetch watchlist');
+      }
+
+      const data = await res.json();
+      setEntries(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateWatched = async (id, currentWatched) => {
+    try {
+      const res = await fetch(`${API_URL}/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ watched: !currentWatched }),
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to update movie');
+      }
+
+      fetchEntries();
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const deleteEntry = async (id) => {
+    const confirmed = window.confirm('Are you sure you want to delete this movie?');
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_URL}/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to delete movie');
+      }
+
+      fetchEntries();
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  useEffect(() => {
+    fetchEntries();
+
+    const interval = setInterval(fetchEntries, 6000);
+
+    return () => clearInterval(interval);
+  }, [filter]);
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div className="container">
+      <h1>Personal Movie Tracker</h1>
 
-      <div className="ticks"></div>
+      <div className="controls">
+        <select value={filter} onChange={(e) => setFilter(e.target.value)}>
+          <option value="all">All movies</option>
+          <option value="watched">Watched</option>
+          <option value="notWatched">Not watched</option>
+        </select>
+      </div>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+      {loading && <p>Loading movies...</p>}
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+      {error && <p className="error">{error}</p>}
+
+      {!loading && !error && (
+        <table>
+          <thead>
+            <tr>
+              <th>Watched</th>
+              <th>Title</th>
+              <th>Genre</th>
+              <th>Year</th>
+              <th>Rating</th>
+              <th>Comment</th>
+              <th>Delete</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {entries.map((entry) => (
+              <tr key={entry._id}>
+                <td>
+                  <input
+                    type="checkbox"
+                    checked={entry.watched}
+                    onChange={() => updateWatched(entry._id, entry.watched)}
+                  />
+                </td>
+                <td>{entry.movieId.title}</td>
+                <td>{entry.movieId.genreId.name}</td>
+                <td>{entry.movieId.releaseYear}</td>
+                <td>{entry.rating ? `${entry.rating}/5` : '-'}</td>
+                <td>{entry.comment || '-'}</td>
+                <td>
+                  <button onClick={() => deleteEntry(entry._id)}>Delete</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
+  );
 }
 
-export default App
+export default App;
