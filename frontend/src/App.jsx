@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import './App.css';
 
+import MovieForm from './components/MovieForm';
+import MovieTable from './components/MovieTable';
+
 const WATCHLIST_API = 'http://localhost:4000/api/watchlist';
 const MOVIES_API = 'http://localhost:4000/api/movies';
 const GENRES_API = 'http://localhost:4000/api/genres';
@@ -267,76 +270,23 @@ function App() {
     <div className="container">
       <h1>Personal Movie Tracker</h1>
 
-      <button onClick={() => setShowAddForm(!showAddForm)}>
-        {showAddForm ? 'Close Add Form' : 'Add Movie'}
-      </button>
-
       {showAddForm && (
-        <form className="form" onSubmit={createMovie}>
-          <h2>Add Movie</h2>
-
-          <input
-            type="text"
-            placeholder="Movie title"
-            value={newMovie.title}
-            onChange={(e) => setNewMovie({ ...newMovie, title: e.target.value })}
-          />
-
-          <select
-            value={newMovie.genreId}
-            onChange={(e) => setNewMovie({ ...newMovie, genreId: e.target.value })}
-          >
-            <option value="">Select genre</option>
-            {genres.map((genre) => (
-              <option key={genre._id} value={genre._id}>
-                {genre.name}
-              </option>
-            ))}
-          </select>
-
-          <input
-            type="number"
-            placeholder="Release year"
-            value={newMovie.releaseYear}
-            onChange={(e) =>
-              setNewMovie({ ...newMovie, releaseYear: e.target.value })
-            }
-          />
-
-          <label>
-            Watched
-            <input
-              type="checkbox"
-              checked={newMovie.watched}
-              onChange={(e) =>
-                setNewMovie({ ...newMovie, watched: e.target.checked })
-              }
-            />
-          </label>
-
-          <input
-            type="number"
-            min="1"
-            max="5"
-            placeholder="Rating"
-            value={newMovie.rating}
-            onChange={(e) => setNewMovie({ ...newMovie, rating: e.target.value })}
-          />
-
-          <input
-            type="text"
-            placeholder="Comment"
-            value={newMovie.comment}
-            onChange={(e) =>
-              setNewMovie({ ...newMovie, comment: e.target.value })
-            }
-          />
-
-          <button type="submit">Save</button>
-        </form>
+        <MovieForm
+          genres={genres}
+          newMovie={newMovie}
+          setNewMovie={setNewMovie}
+          createMovie={createMovie}
+        />
       )}
 
-      <div className="controls">
+      <div className="top-bar">
+        <button
+          className="add-btn"
+          onClick={() => setShowAddForm(!showAddForm)}
+        >
+          {showAddForm ? 'Close' : '+ Add Movie'}
+        </button>
+
         <select value={filter} onChange={(e) => setFilter(e.target.value)}>
           <option value="all">All movies</option>
           <option value="watched">Watched</option>
@@ -349,123 +299,18 @@ function App() {
       {error && <p className="error">{error}</p>}
 
       {!loading && !error && (
-        <table>
-          <thead>
-            <tr>
-              <th>Watched</th>
-              <th>Title</th>
-              <th>Genre</th>
-              <th>Year</th>
-              <th>Rating</th>
-              <th>Comment</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {entries.map((entry) => (
-              <tr key={entry._id}>
-                {editingId === entry._id ? (
-                  <>
-                    <td>
-                      <input
-                        type="checkbox"
-                        checked={editData.watched}
-                        onChange={(e) =>
-                          setEditData({ ...editData, watched: e.target.checked })
-                        }
-                      />
-                    </td>
-
-                    <td>
-                      <input
-                        type="text"
-                        value={editData.title}
-                        onChange={(e) =>
-                          setEditData({ ...editData, title: e.target.value })
-                        }
-                      />
-                    </td>
-
-                    <td>
-                      <select
-                        value={editData.genreId}
-                        onChange={(e) =>
-                          setEditData({ ...editData, genreId: e.target.value })
-                        }
-                      >
-                        {genres.map((genre) => (
-                          <option key={genre._id} value={genre._id}>
-                            {genre.name}
-                          </option>
-                        ))}
-                      </select>
-                    </td>
-
-                    <td>
-                      <input
-                        type="number"
-                        value={editData.releaseYear}
-                        onChange={(e) =>
-                          setEditData({
-                            ...editData,
-                            releaseYear: e.target.value,
-                          })
-                        }
-                      />
-                    </td>
-
-                    <td>
-                      <input
-                        type="number"
-                        min="1"
-                        max="5"
-                        value={editData.rating}
-                        onChange={(e) =>
-                          setEditData({ ...editData, rating: e.target.value })
-                        }
-                      />
-                    </td>
-
-                    <td>
-                      <input
-                        type="text"
-                        value={editData.comment}
-                        onChange={(e) =>
-                          setEditData({ ...editData, comment: e.target.value })
-                        }
-                      />
-                    </td>
-
-                    <td>
-                      <button onClick={() => saveEdit(entry)}>Save</button>
-                      <button onClick={cancelEdit}>Cancel</button>
-                    </td>
-                  </>
-                ) : (
-                  <>
-                    <td>
-                      <input
-                        type="checkbox"
-                        checked={entry.watched}
-                        onChange={() => updateWatched(entry._id, entry.watched)}
-                      />
-                    </td>
-                    <td>{entry.movieId.title}</td>
-                    <td>{entry.movieId.genreId.name}</td>
-                    <td>{entry.movieId.releaseYear}</td>
-                    <td>{entry.rating ? `${entry.rating}/5` : '-'}</td>
-                    <td>{entry.comment || '-'}</td>
-                    <td>
-                      <button onClick={() => startEdit(entry)}>Edit</button>
-                      <button onClick={() => deleteEntry(entry._id)}>Delete</button>
-                    </td>
-                  </>
-                )}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <MovieTable
+          entries={entries}
+          genres={genres}
+          editingId={editingId}
+          editData={editData}
+          setEditData={setEditData}
+          startEdit={startEdit}
+          cancelEdit={cancelEdit}
+          saveEdit={saveEdit}
+          updateWatched={updateWatched}
+          deleteEntry={deleteEntry}
+        />
       )}
     </div>
   );
