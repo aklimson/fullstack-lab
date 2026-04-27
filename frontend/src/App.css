@@ -1,26 +1,139 @@
 .container {
-  max-width: 1000px;
+  max-width: 1100px;
   margin: 40px auto;
   padding: 20px;
   font-family: Arial, sans-serif;
+  color: #111111;
 }
 
 h1 {
   text-align: center;
+  margin-bottom: 24px;
+  color: #111111;
+}
+
+button {
+  padding: 8px 14px;
+  margin: 4px;
+  cursor: pointer;
+  border: none;
+  border-radius: 6px;
+  background-color: #4a90e2;
+  color: white;
+  transition: 0.2s;
+  font-size: 15px;
+}
+
+button:hover {
+  background-color: #357abd;
+}
+
+/* Add movie button */
+.add-movie-btn {
+  background-color: #16a34a;
+  color: white;
+  font-weight: bold;
+  padding: 9px 18px;
+}
+
+.add-movie-btn:hover {
+  background-color: #15803d;
+}
+
+.form {
+  border: 2px solid #4a90e2;
+  background-color: #f5f9ff;
+  padding: 20px;
+  margin: 20px 0;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+  border-radius: 10px;
+  color: #111111;
+}
+
+.form h2 {
+  width: 100%;
+  text-align: center;
+  margin-bottom: 10px;
+  color: #1f4f8f;
+}
+
+input,
+select {
+  padding: 8px;
+  font-size: 15px;
+  border-radius: 6px;
+  border: 1px solid #999;
+  color: #111111;
+  background-color: white;
+}
+
+input::placeholder {
+  color: #555555;
+}
+
+.form input[type='text'],
+.form input[type='number'],
+.form select {
+  min-width: 180px;
+}
+
+.watched-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #111111;
+}
+
+.form-button {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.form-button button {
+  width: 120px;
 }
 
 .controls {
-  margin-bottom: 20px;
+  margin: 20px 0 14px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-select {
-  padding: 8px;
-  font-size: 16px;
+.controls select {
+  min-width: 180px;
+}
+
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 20px 0;
+}
+
+.top-bar select {
+  min-width: 180px;
+}
+
+.add-btn {
+  background-color: #1da857;
+  color: white;
+  font-weight: bold;
+}
+
+.add-btn:hover {
+  background-color: #27ae60;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
+  margin-top: 10px;
+  color: #111111;
 }
 
 th,
@@ -28,12 +141,49 @@ td {
   border: 1px solid #ddd;
   padding: 10px;
   text-align: left;
+  vertical-align: middle;
 }
 
 th {
-  background-color: #f3f3f3;
+  background-color: #4a90e2;
+  color: white;
+}
+
+tr:nth-child(even) {
+  background-color: #f2f7ff;
+}
+
+td input,
+td select {
+  max-width: 140px;
+}
+
+td button {
+  width: 85px;
+  height: 34px;
+  padding: 0;
+  margin: 4px 0;
+  display: block;
+  text-align: center;
+}
+
+td button:first-child {
+  background-color: #4a90e2;
+}
+
+td button:first-child:hover {
+  background-color: #357abd;
+}
+
+td button:last-child {
+  background-color: #e35343;
+}
+
+td button:last-child:hover {
+  background-color: #c0392b;
 }
 
 .error {
   color: red;
+  font-weight: bold;
 }
