@@ -22,7 +22,8 @@ const seedData = async () => {
             {name: 'Sci-Fi'},
             {name: 'Action'},
             {name: 'Drama'},
-            {name: 'Comedy'}
+            {name: 'Comedy'},
+            {name: 'Fantasy'}
         ]);
 
         //Movies
